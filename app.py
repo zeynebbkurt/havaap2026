@@ -1,14 +1,18 @@
 import streamlit as st
+import requests
 
-st.title("Yapılacaklar Listesi")
+st.title("Anlık Hava Durumu")
 
-if "gorevler" not in st.session_state:
-    st.session_state["gorevler"] = []
+sehir = st.text_input("Şehir adı girin")
+api_key = "b26752b4cf01b9bb88f59ec5b3a91c2b"
 
-yeni_gorev = st.text_input("Yeni görev ekle")
-if st.button("Ekle") and yeni_gorev:
-    st.session_state["gorevler"].append({"ad": yeni_gorev, "tamam": False})
-
-for i, gorev in enumerate(st.session_state["gorevler"]):
-    tamamlandi = st.checkbox(gorev["ad"], value=gorev["tamam"], key=i)
-    st.session_state["gorevler"][i]["tamam"] = tamamlandi
+if st.button("Sorgula") and sehir:
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={sehir}&appid={api_key}&units=metric&lang=tr"
+    r = requests.get(url)
+    if r.status_code == 200:
+        veri = r.json()
+        st.write("Sıcaklık:", veri["main"]["temp"], "°C")
+        st.write("Durum:", veri["weather"][0]["description"])
+        st.write("Nem:", veri["main"]["humidity"])
+    else:
+        st.error("Şehir bulunamadı veya API anahtarı hatalı.")
